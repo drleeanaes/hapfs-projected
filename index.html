@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAPFS Global Equity Fund — Projected Value</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root, [data-theme="dark"] {
+  --bg:        #07080a;
+  --s1:        #0d1014;
+  --s2:        #131820;
+  --s3:        #192028;
+  --border:    rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.11);
+  --text:      #dde8f0;
+  --muted:     #4a6878;
+  --dim:       #1c2a34;
+  --gold:      #d4a030;
+  --gold-d:    rgba(212,160,48,0.10);
+  --gold-h:    rgba(212,160,48,0.20);
+  --gold-t:    #f5cc70;      /* lighter for text on dark */
+  --green:     #4ecf80;
+  --green-d:   rgba(78,207,128,0.08);
+  --red:       #e07060;
+  --red-d:     rgba(224,112,96,0.10);
+  --vest0:     rgba(224,112,96,0.18);
+  --vest30:    rgba(240,180,60,0.15);
+  --vest100:   rgba(78,207,128,0.12);
+  --ctg:       rgba(255,255,255,0.04);
+  --ctt:       #4a6878;
+  --ttbg:      #0d1014;
+  --ttbd:      rgba(212,160,48,0.20);
+  --ttbdy:     #dde8f0;
+}
+[data-theme="light"] {
+  --bg:        #f2f0ea;
+  --s1:        #faf8f3;
+  --s2:        #f0ece2;
+  --s3:        #e6e0d4;
+  --border:    rgba(0,0,0,0.07);
+  --border-md: rgba(0,0,0,0.13);
+  --text:      #140e04;
+  --muted:     #7a6a4a;
+  --dim:       #d4c8aa;
+  --gold:      #8a5a00;
+  --gold-d:    rgba(138,90,0,0.07);
+  --gold-h:    rgba(138,90,0,0.15);
+  --gold-t:    #7a4a00;
+  --green:     #1a6a38;
+  --green-d:   rgba(26,106,56,0.07);
+  --red:       #a03020;
+  --red-d:     rgba(160,48,32,0.08);
+  --vest0:     rgba(160,48,32,0.10);
+  --vest30:    rgba(180,120,0,0.10);
+  --vest100:   rgba(26,106,56,0.10);
+  --ctg:       rgba(0,0,0,0.05);
+  --ctt:       #9a8a6a;
+  --ttbg:      #fff;
+  --ttbd:      rgba(0,0,0,0.08);
+  --ttbdy:     #140e04;
+}
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Geist',sans-serif;
+  font-size:14px;line-height:1.65;min-height:100vh;
+  transition:background .3s,color .3s;
+}
+
+/* dark ambient glow */
+[data-theme="dark"] body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,160,48,0.06) 0%, transparent 60%);
+}
+
+.shell{max-width:980px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1}
+
+/* ─── HEADER ─────────────────────────────────────────────── */
+header{
+  padding:48px 0 36px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:44px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:20px;flex-wrap:wrap;
+}
+.title-block{display:flex;flex-direction:column;gap:5px}
+.eyebrow{
+  font-family:'Geist Mono',monospace;font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+}
+h1{
+  font-family:'Instrument Serif',serif;
+  font-size:36px;font-weight:400;line-height:1.05;
+  color:var(--text);letter-spacing:-.3px;
+}
+h1 em{color:var(--gold-t);font-style:italic}
+.h1-sub{font-size:12px;color:var(--muted);font-family:'Geist Mono',monospace;margin-top:2px}
+
+.header-right{display:flex;align-items:center;gap:10px}
+.factsheet-tag{
+  font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);
+  border:1px solid var(--border-md);border-radius:7px;
+  padding:7px 12px;line-height:1.75;text-align:right;
+}
+.factsheet-tag b{color:var(--gold-t);display:block;font-size:11px}
+
+.theme-btn{
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--border-md);
+  background:var(--s1);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .2s;flex-shrink:0;
+}
+.theme-btn:hover{background:var(--s2)}
+.theme-btn svg{width:15px;height:15px}
+[data-theme="dark"] .icon-moon{display:none}[data-theme="dark"] .icon-sun{display:block}
+[data-theme="light"] .icon-sun{display:none}[data-theme="light"] .icon-moon{display:block}
+
+/* ─── BIG YEAR SLIDER ────────────────────────────────────── */
+.slider-section{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:18px;padding:32px 36px;margin-bottom:24px;
+  display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
+}
+@media(max-width:600px){.slider-section{grid-template-columns:1fr;padding:22px}}
+
+.slider-left{display:flex;flex-direction:column;gap:16px}
+
+.yr-readout{display:flex;align-items:baseline;gap:10px}
+.yr-number{
+  font-family:'Instrument Serif',serif;
+  font-size:88px;font-weight:400;line-height:1;letter-spacing:-4px;
+  transition:color .3s;
+}
+.yr-unit{font-size:18px;color:var(--muted);font-family:'Geist Mono',monospace}
+
+.yr-slider{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:4px;background:var(--dim);border-radius:2px;
+  outline:none;cursor:pointer;transition:background .3s;
+}
+.yr-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+  background:var(--gold);cursor:pointer;
+  border:4px solid var(--s1);
+  box-shadow:0 0 0 1.5px var(--gold), 0 4px 16px rgba(212,160,48,0.35);
+  transition:transform .1s,background .3s;
+}
+.yr-slider::-webkit-slider-thumb:hover{transform:scale(1.12)}
+
+.yr-marks{
+  display:flex;justify-content:space-between;
+  font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);
+  padding:0 2px;
+}
+
+/* vesting status pill */
+.vest-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:30px;padding:5px 14px;
+  font-size:12px;font-family:'Geist Mono',monospace;font-weight:500;
+  border:1px solid transparent;transition:all .3s;width:fit-content;
+}
+.vest-pill.v0  {background:var(--vest0);border-color:var(--red);color:var(--red)}
+.vest-pill.v30 {background:var(--vest30);border-color:var(--gold);color:var(--gold-t)}
+.vest-pill.v100{background:var(--vest100);border-color:var(--green);color:var(--green)}
+.vest-pill-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* right side: salary + contribution card */
+.contrib-card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:14px;padding:18px 20px;min-width:210px;
+}
+.cc-title{
+  font-size:10px;font-family:'Geist Mono',monospace;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--muted);
+  margin-bottom:12px;
+}
+.cc-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:4px 0;border-bottom:0.5px solid var(--border);
+  font-size:12px;color:var(--muted);
+}
+.cc-row:last-child{border-bottom:none}
+.cc-val{font-family:'Geist Mono',monospace;font-weight:500;color:var(--text);font-size:13px}
+.cc-val.gold{color:var(--gold-t)}
+
+/* ─── KEY METRICS ────────────────────────────────────────── */
+.metrics{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  margin-bottom:24px;
+}
+@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
+.mc{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:13px;padding:14px 16px;transition:all .3s;
+}
+.mc.gold-hi{border-color:var(--gold-h);background:var(--gold-d)}
+.mc.green-hi{border-color:rgba(78,207,128,0.25);background:var(--green-d)}
+.mc.red-hi{border-color:rgba(224,112,96,0.25);background:var(--red-d)}
+.mc-lbl{
+  font-size:10px;font-family:'Geist Mono',monospace;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;
+}
+.mc-val{
+  font-size:21px;font-weight:500;
+  font-family:'Geist Mono',monospace;
+  color:var(--text);letter-spacing:-.4px;line-height:1.1;
+}
+.mc-sub{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* ─── WITHDRAWAL RULES BOX ───────────────────────────────── */
+.rules-box{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:14px;padding:18px 22px;margin-bottom:24px;
+}
+.rules-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+@media(max-width:640px){.rules-grid{grid-template-columns:repeat(3,1fr)}}
+.rule-cell{
+  border-radius:9px;padding:10px 8px;text-align:center;
+  border:1px solid transparent;transition:all .3s;
+}
+.rule-cell.active-rule{border-width:1.5px}
+.rule-cell.v0-c  {background:var(--vest0);border-color:var(--red)}
+.rule-cell.v30-c {background:var(--vest30);border-color:var(--gold)}
+.rule-cell.v100-c{background:var(--vest100);border-color:var(--green)}
+.rule-cell .rc-yr{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:3px}
+.rule-cell .rc-pct{
+  font-family:'Instrument Serif',serif;font-size:26px;font-weight:400;line-height:1;
+}
+.rule-cell .rc-lbl{font-size:10px;color:var(--muted);margin-top:3px}
+.rule-cell.v0-c   .rc-pct{color:var(--red)}
+.rule-cell.v30-c  .rc-pct{color:var(--gold-t)}
+.rule-cell.v100-c .rc-pct{color:var(--green)}
+.rule-note{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace;margin-top:10px;line-height:1.7}
+
+/* ─── CHART PANELS ───────────────────────────────────────── */
+.chart-area{display:flex;flex-direction:column;gap:18px}
+.cp{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:14px;padding:20px 22px;transition:background .3s;
+}
+.cp-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:14px;flex-wrap:wrap;gap:8px;
+}
+.cp-title{font-size:13px;font-weight:500;color:var(--text)}
+.cp-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace}
+.leg{display:flex;align-items:center;gap:5px}
+.lsw{width:14px;height:3px;border-radius:1px;flex-shrink:0}
+
+/* two columns */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+
+/* ─── YEAR TABLE ─────────────────────────────────────────── */
+.yr-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.yr-tbl th{
+  font-size:10px;font-weight:400;color:var(--muted);
+  padding:7px 9px;border-bottom:0.5px solid var(--border-md);
+  text-align:left;font-family:'Geist Mono',monospace;
+  text-transform:uppercase;letter-spacing:.05em;
+  position:sticky;top:0;background:var(--s1);
+}
+.yr-tbl td{
+  padding:5px 9px;border-bottom:0.5px solid var(--border);
+  font-family:'Geist Mono',monospace;font-size:11px;color:var(--text);
+}
+.yr-tbl tr:last-child td{border-bottom:none}
+.yr-tbl td.g{color:var(--gold-t)}
+.yr-tbl td.gr{color:var(--green)}
+.yr-tbl td.r{color:var(--red)}
+.yr-tbl td.m{color:var(--muted)}
+.yr-tbl tr.row-v0  td{background:var(--vest0)}
+.yr-tbl tr.row-v30 td{background:var(--vest30)}
+.yr-tbl tr.row-v100 td{background:var(--vest100)}
+.yr-tbl tr.row-cur td{font-weight:600}
+
+/* ─── FUND PROFILE STRIP ─────────────────────────────────── */
+.fund-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px;
+}
+@media(max-width:600px){.fund-strip{grid-template-columns:1fr 1fr}}
+.fs-card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:10px;padding:10px 13px;
+}
+.fs-lbl{font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.fs-val{font-size:15px;font-weight:500;font-family:'Geist Mono',monospace;color:var(--text)}
+.fs-val.gold{color:var(--gold-t)}
+.fs-val.green{color:var(--green)}
+
+/* ─── FOOTNOTE ───────────────────────────────────────────── */
+.footnote{
+  margin-top:24px;padding:14px 20px;
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  font-size:11px;color:var(--muted);
+  font-family:'Geist Mono',monospace;line-height:1.85;transition:background .3s;
+}
+.footnote strong{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- HEADER -->
+<header>
+  <div class="title-block">
+    <div class="eyebrow">Hospital Authority · HAPFS</div>
+    <h1>Global Equity Fund<br><em>Projected Value</em></h1>
+    <div class="h1-sub">Drag the slider · vesting rules applied · HA contributes 15% of salary</div>
+  </div>
+  <div class="header-right">
+    <div class="factsheet-tag">
+      <b>Factsheet 31/3/2026</b>
+      10-yr: +139.6% cumulative<br>
+      CAGR: 9.11% p.a.<br>
+      Fund size: HK$12,948M
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="8" cy="8" r="3"/>
+        <line x1="8" y1="1" x2="8" y2="2.5"/><line x1="8" y1="13.5" x2="8" y2="15"/>
+        <line x1="1" y1="8" x2="2.5" y2="8"/><line x1="13.5" y1="8" x2="15" y2="8"/>
+        <line x1="3.05" y1="3.05" x2="4.1" y2="4.1"/><line x1="11.9" y1="11.9" x2="12.95" y2="12.95"/>
+        <line x1="12.95" y1="3.05" x2="11.9" y2="4.1"/><line x1="4.1" y1="11.9" x2="3.05" y2="12.95"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13.5 10.5A6 6 0 0 1 5.5 2.5a6 6 0 1 0 8 8z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- FUND PROFILE STRIP -->
+<div class="fund-strip">
+  <div class="fs-card"><div class="fs-lbl">Fund</div><div class="fs-val">Global Equity</div></div>
+  <div class="fs-card"><div class="fs-lbl">10-yr CAGR</div><div class="fs-val gold">9.11% p.a.</div></div>
+  <div class="fs-card"><div class="fs-lbl">5-yr return</div><div class="fs-val gold">+31.2%</div></div>
+  <div class="fs-card"><div class="fs-lbl">1-yr return</div><div class="fs-val green">+16.2%</div></div>
+  <div class="fs-card"><div class="fs-lbl">Since inception</div><div class="fs-val green">+249.6%</div></div>
+  <div class="fs-card"><div class="fs-lbl">Fund size</div><div class="fs-val">HK$12,948M</div></div>
+  <div class="fs-card"><div class="fs-lbl">Risk (3yr SD)</div><div class="fs-val">11.1% p.a.</div></div>
+  <div class="fs-card"><div class="fs-lbl">HA contribution</div><div class="fs-val gold">15% salary</div></div>
+</div>
+
+<!-- BIG SLIDER SECTION -->
+<div class="slider-section">
+  <div class="slider-left">
+    <div class="yr-readout">
+      <div class="yr-number" id="yrNumber">25</div>
+      <div class="yr-unit">years</div>
+    </div>
+
+    <input type="range" class="yr-slider" id="yrSlider"
+      min="1" max="35" value="25" step="1" oninput="update()">
+
+    <div class="yr-marks">
+      <span>1</span><span>5</span><span>10</span><span>15</span>
+      <span>20</span><span>25</span><span>30</span><span>35</span>
+    </div>
+
+    <div class="vest-pill" id="vestPill">
+      <div class="vest-pill-dot"></div>
+      <span id="vestPillText">100% vested — fully claimable</span>
+    </div>
+  </div>
+
+  <div class="contrib-card">
+    <div class="cc-title">At year <span id="ccYr">25</span></div>
+    <div class="cc-row"><span>Basic salary</span><span class="cc-val" id="ccSal">—</span></div>
+    <div class="cc-row"><span>HA monthly contrib (15%)</span><span class="cc-val gold" id="ccMo">—</span></div>
+    <div class="cc-row"><span>HA annual contribution</span><span class="cc-val gold" id="ccAnn">—</span></div>
+    <div class="cc-row"><span>Total HA contributed (all yrs)</span><span class="cc-val" id="ccCumul">—</span></div>
+    <div class="cc-row"><span>Employee contribution</span><span class="cc-val" id="ccEmp">HK$0</span></div>
+  </div>
+</div>
+
+<!-- KEY METRICS -->
+<div class="metrics" id="metricsRow"></div>
+
+<!-- VESTING RULES -->
+<div class="rules-box">
+  <div style="font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px">
+    Withdrawal rules — Appendix III, HA (13 March 2025)
+  </div>
+  <div class="rules-grid" id="rulesGrid"></div>
+  <div class="rule-note" id="ruleNote"></div>
+</div>
+
+<!-- CHARTS -->
+<div class="chart-area">
+
+  <div class="cp">
+    <div class="cp-head">
+      <div>
+        <div class="cp-title">Accumulated fund value — all years of service</div>
+        <div class="cp-sub">Gross fund value · vested claimable amount · HA cumulative contributions · forfeited if leaving</div>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="lsw" style="background:var(--gold)"></span>Gross fund</span>
+        <span class="leg"><span class="lsw" style="background:var(--green)"></span>Claimable (vested)</span>
+        <span class="leg"><span class="lsw" style="background:var(--red);opacity:.7"></span>Forfeited</span>
+        <span class="leg"><span class="lsw" style="background:rgba(255,255,255,0.2)"></span>HA contributions</span>
+      </div>
+    </div>
+    <div style="position:relative;height:340px">
+      <canvas id="mainChart" role="img"
+        aria-label="Line chart of HAPFS fund value over 35 years of service showing gross value, vested claimable amount, and forfeited portion">
+        HAPFS fund value projection.
+      </canvas>
+    </div>
+  </div>
+
+  <div class="two-col">
+
+    <div class="cp">
+      <div class="cp-head">
+        <div>
+          <div class="cp-title">Annual HA contribution by year</div>
+          <div class="cp-sub">Grows with salary at 2.5% p.a. from year 6</div>
+        </div>
+      </div>
+      <div style="position:relative;height:220px">
+        <canvas id="contribChart" role="img"
+          aria-label="Bar chart of annual HA contributions as salary grows">
+          Annual contributions.
+        </canvas>
+      </div>
+    </div>
+
+    <div class="cp">
+      <div class="cp-head">
+        <div>
+          <div class="cp-title">Investment gain vs HA contributions</div>
+          <div class="cp-sub">Compounding effect over career</div>
+        </div>
+      </div>
+      <div style="position:relative;height:220px">
+        <canvas id="gainChart" role="img"
+          aria-label="Stacked bar chart showing HA contributions and investment gain at milestone years">
+          Contributions vs gains.
+        </canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Year-by-year table -->
+  <div class="cp">
+    <div class="cp-head">
+      <div>
+        <div class="cp-title">Year-by-year full projection</div>
+        <div class="cp-sub">Every service year · salary · contribution · fund value · vesting · claimable · forfeited</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:380px;overflow-y:auto">
+      <table class="yr-tbl">
+        <thead>
+          <tr>
+            <th>Yr</th>
+            <th>Basic salary</th>
+            <th>HA contrib (yr)</th>
+            <th>Cumul HA contrib</th>
+            <th>Gross fund value</th>
+            <th>Investment gain</th>
+            <th>Gain vs contrib</th>
+            <th>Vest %</th>
+            <th>Claimable ✓</th>
+            <th>Forfeited ✗</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="footnote">
+  <strong>Methodology</strong><br>
+  Salary: Yr1 HK$127,700 · Yr2 HK$132,275 · Yr3 HK$137,085 · Yr4 HK$142,010 · Yr5 HK$147,125 · Yr6+ compounded 2.5% p.a.<br>
+  HA employer contribution: 15% of monthly basic salary — no cap, no employee contribution required under HAPFS.<br>
+  Fund return: HAPFS Global Equity Fund 9.11% p.a. CAGR (derived from 10-year cumulative return of 139.6%, factsheet as at 31/3/2026). Applied as monthly compounding (0.7592%/month).<br>
+  Vesting: 0% if credited service &lt;3 years · 30% at 3 yrs · 40% at 4 yrs · 50% at 5 yrs · 60% at 6 yrs · 70% at 7 yrs · 80% at 8 yrs · 90% at 9 yrs · 100% at 10+ years (Appendix III, HA 13 March 2025).<br>
+  On leaving: the vested portion is claimable. The forfeited portion returns to HA. Minimum MPF Benefits (MMB) are preserved separately under MPF Ordinance regardless of vesting. All figures are gross (pre-tax). Past performance does not guarantee future results. Not financial advice.
+</div>
+
+</div><!-- /shell -->
+<script>
+/* ─── THEME ────────────────────────────────────────────────── */
+function toggleTheme(){
+  const h=document.documentElement;
+  const n=h.dataset.theme==='dark'?'light':'dark';
+  h.dataset.theme=n;
+  try{localStorage.setItem('hapfs-pv-theme',n)}catch(e){}
+  update();
+}
+try{const s=localStorage.getItem('hapfs-pv-theme');if(s)document.documentElement.dataset.theme=s}catch(e){}
+
+/* ─── SALARY ───────────────────────────────────────────────── */
+function getSalary(yr){
+  const b=[127700,132275,137085,142010,147125];
+  if(yr<=5) return b[yr-1];
+  return Math.round(147125*Math.pow(1.025,yr-5));
+}
+
+/* ─── VESTING ──────────────────────────────────────────────── */
+const VEST_MAP={1:0,2:0,3:30,4:40,5:50,6:60,7:70,8:80,9:90};
+function getVest(yr){ return yr<3?0:yr>=10?100:VEST_MAP[yr]||0; }
+
+/* ─── CONSTANTS ────────────────────────────────────────────── */
+const RATE_ANN=0.0911;
+const RATE_MO =RATE_ANN/12;   // 0.759167% per month
+const MAX_YRS =35;
+
+/* ─── PRE-COMPUTE ALL 35 YEARS ─────────────────────────────── */
+function computeAll(){
+  let fund=0,cumContrib=0;
+  const rows=[];
+  for(let yr=1;yr<=MAX_YRS;yr++){
+    const sal=getSalary(yr);
+    const moContrib=sal*0.15;
+    const annContrib=moContrib*12;
+    // compound monthly
+    for(let m=0;m<12;m++) fund=(fund+moContrib)*(1+RATE_MO);
+    cumContrib+=annContrib;
+    const gain=fund-cumContrib;
+    const vest=getVest(yr);
+    const claimable=Math.round(fund*vest/100);
+    const forfeited=Math.round(fund*(100-vest)/100);
+    rows.push({
+      yr, sal,
+      annContrib:Math.round(annContrib),
+      cumContrib:Math.round(cumContrib),
+      gross:Math.round(fund),
+      gain:Math.round(gain),
+      gainPct:gain/cumContrib,
+      vest, claimable, forfeited,
+    });
+  }
+  return rows;
+}
+const ALL=computeAll();
+
+/* ─── HELPERS ──────────────────────────────────────────────── */
+function cv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function hk(v,dec=2){
+  const a=Math.abs(v),s=v<0?'-':'';
+  if(a>=1e8) return s+'HK$'+(a/1e8).toFixed(dec)+'億';
+  if(a>=1e6) return s+'HK$'+(a/1e6).toFixed(dec)+'M';
+  if(a>=1e3) return s+'HK$'+(a/1e3).toFixed(0)+'k';
+  return s+'HK$'+Math.round(a).toLocaleString();
+}
+function pct(v){return (v*100).toFixed(1)+'%'}
+
+/* ─── CHART INSTANCES ──────────────────────────────────────── */
+let mainC=null,contribC=null,gainC=null;
+
+/* ─── VESTING RULES GRID ───────────────────────────────────── */
+const VEST_RULES=[
+  {label:'< 3 years', pct:0,   cls:'v0-c'},
+  {label:'3 years',   pct:30,  cls:'v30-c'},
+  {label:'4 years',   pct:40,  cls:'v30-c'},
+  {label:'5 years',   pct:50,  cls:'v30-c'},
+  {label:'6 years',   pct:60,  cls:'v30-c'},
+  {label:'7 years',   pct:70,  cls:'v30-c'},
+  {label:'8 years',   pct:80,  cls:'v30-c'},
+  {label:'9 years',   pct:90,  cls:'v30-c'},
+  {label:'10+ years', pct:100, cls:'v100-c'},
+];
+
+function buildRulesGrid(activeYr){
+  const activeVest=getVest(activeYr);
+  document.getElementById('rulesGrid').innerHTML=VEST_RULES.map(r=>{
+    const isActive=(r.pct===0&&activeYr<3)||(r.pct===activeVest&&r.pct>0&&r.pct<100&&activeYr<10&&activeYr>=3)||(r.pct===100&&activeYr>=10);
+    return `<div class="rule-cell ${r.cls}${isActive?' active-rule':''}">
+      <div class="rc-yr">${r.label}</div>
+      <div class="rc-pct">${r.pct}%</div>
+      <div class="rc-lbl">${isActive?'← you are here':''}</div>
+    </div>`;
+  }).join('');
+
+  const rr=ALL[activeYr-1];
+  const noteMap={
+    0:`⚠ Leaving before year 3 means forfeiting the entire HK${hk(rr.gross).replace('HK$','$')} back to HA. Zero is withdrawn.`,
+    30:`You vest 30% — if you leave now you take HK${hk(rr.claimable).replace('HK$','$')} and forfeit HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    40:`You vest 40% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    50:`You vest 50% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    60:`You vest 60% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    70:`You vest 70% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    80:`You vest 80% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}.`,
+    90:`You vest 90% — claimable HK${hk(rr.claimable).replace('HK$','$')}, forfeited HK${hk(rr.forfeited).replace('HK$','$')}. One more year unlocks the remaining 10%.`,
+    100:`✅ Fully vested. The entire HK${hk(rr.gross).replace('HK$','$')} is yours. HA also provides post-retirement medical benefits for you and your spouse.`,
+  };
+  document.getElementById('ruleNote').textContent=noteMap[activeVest]||'';
+}
+
+/* ─── MAIN UPDATE ──────────────────────────────────────────── */
+function update(){
+  const yrs=parseInt(document.getElementById('yrSlider').value);
+  const r=ALL[yrs-1];
+  const goldC=cv('--gold'),goldT=cv('--gold-t'),greenC=cv('--green'),redC=cv('--red');
+
+  /* year display */
+  document.getElementById('yrNumber').textContent=yrs;
+  document.getElementById('yrNumber').style.color=
+    r.vest===0?cv('--red'):r.vest===100?greenC:goldT;
+
+  /* vesting pill */
+  const pillEl=document.getElementById('vestPill');
+  const pillTxt=document.getElementById('vestPillText');
+  pillEl.className='vest-pill '+(r.vest===0?'v0':r.vest===100?'v100':'v30');
+  pillTxt.textContent=
+    r.vest===0?`0% vested — forfeit all HK${hk(r.gross).replace('HK$','$')} if leaving now`:
+    r.vest===100?`100% vested — full HK${hk(r.gross).replace('HK$','$')} claimable`:
+    `${r.vest}% vested — claimable HK${hk(r.claimable).replace('HK$','$')}`;
+
+  /* contrib card */
+  document.getElementById('ccYr').textContent=yrs;
+  document.getElementById('ccSal').textContent='HK$'+r.sal.toLocaleString();
+  document.getElementById('ccMo').textContent='HK$'+Math.round(r.sal*.15).toLocaleString();
+  document.getElementById('ccAnn').textContent='HK$'+r.annContrib.toLocaleString();
+  document.getElementById('ccCumul').textContent=hk(r.cumContrib,1);
+
+  /* metrics */
+  const gainPctStr='+'+pct(r.gainPct);
+  const mData=[
+    {lbl:'Gross fund value',   val:hk(r.gross,2),  sub:'Total incl unrealised gains', cls:'gold-hi', color:goldT},
+    {lbl:'Claimable (vested)', val:hk(r.claimable,2),sub:`${r.vest}% of gross fund`,  cls:r.vest===100?'green-hi':r.vest===0?'red-hi':'gold-hi', color:r.vest===100?greenC:r.vest===0?redC:goldT},
+    {lbl:'Investment gain',    val:hk(r.gain,2),   sub:gainPctStr+' on HA contributions', cls:'green-hi', color:greenC},
+    {lbl:'Forfeited if leaving',val:hk(r.forfeited,2),sub:`${100-r.vest}% returned to HA`, cls:r.forfeited>0?'red-hi':'', color:r.forfeited>0?redC:cv('--text')},
+  ];
+  document.getElementById('metricsRow').innerHTML=mData.map(m=>
+    `<div class="mc ${m.cls}">
+      <div class="mc-lbl">${m.lbl}</div>
+      <div class="mc-val" style="color:${m.color}">${m.val}</div>
+      <div class="mc-sub">${m.sub}</div>
+    </div>`
+  ).join('');
+
+  /* rules grid */
+  buildRulesGrid(yrs);
+
+  /* chart common */
+  const ttO={backgroundColor:cv('--ttbg'),borderColor:cv('--ttbd'),borderWidth:1,titleColor:cv('--ctt'),bodyColor:cv('--ttbdy'),padding:10};
+  const scX={grid:{color:cv('--ctg')},ticks:{color:cv('--ctt'),font:{size:10,family:"'Geist Mono',monospace"},maxTicksLimit:12}};
+  const scY={grid:{color:cv('--ctg')},ticks:{color:cv('--ctt'),font:{size:10,family:"'Geist Mono',monospace"},
+    callback:v=>'HK$'+(Math.abs(v)>=1e6?(v/1e6).toFixed(1)+'M':Math.abs(v)>=1e3?(v/1e3).toFixed(0)+'k':v)}};
+  const ylbls=ALL.map(d=>'Yr '+d.yr);
+
+  /* ── main chart ── */
+  if(mainC)mainC.destroy();
+  mainC=new Chart(document.getElementById('mainChart').getContext('2d'),{
+    type:'line',
+    data:{labels:ylbls,datasets:[
+      {label:'Gross fund value',data:ALL.map(d=>d.gross),borderColor:goldC,borderWidth:2.5,pointRadius:0,pointHoverRadius:5,tension:0.3,fill:false},
+      {label:'Claimable (vested)',data:ALL.map(d=>d.claimable),borderColor:greenC,borderWidth:1.5,borderDash:[5,3],pointRadius:0,tension:0.3,fill:false},
+      {label:'Forfeited',data:ALL.map(d=>d.forfeited),borderColor:redC,borderWidth:1,borderDash:[2,3],pointRadius:0,tension:0.3,fill:false,backgroundColor:redC+'18'},
+      {label:'HA cumulative contributions',data:ALL.map(d=>d.cumContrib),borderColor:'rgba(255,255,255,0.18)',borderWidth:1,borderDash:[8,4],pointRadius:0,tension:0,fill:false},
+      // vertical marker for current year
+      {label:'Current year',data:ALL.map(d=>d.yr===yrs?d.gross:null),
+        borderColor:goldC+'90',borderWidth:0,pointRadius:ALL.map(d=>d.yr===yrs?7:0),
+        pointBackgroundColor:goldC,pointBorderColor:cv('--s1'),pointBorderWidth:3,
+        showLine:false,tension:0,fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{...ttO,callbacks:{label:c=>' '+c.dataset.label+': HK$'+c.parsed.y.toLocaleString(),
+        filter:i=>i.dataset.label!=='Current year'}}},
+      scales:{x:scX,y:scY}}
+  });
+
+  /* ── annual contribution bar ── */
+  if(contribC)contribC.destroy();
+  const dispYrs=ALL.filter(d=>d.yr<=Math.min(yrs,30));
+  contribC=new Chart(document.getElementById('contribChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:dispYrs.map(d=>'Yr '+d.yr),datasets:[{
+      label:'Annual HA contribution',
+      data:dispYrs.map(d=>d.annContrib),
+      backgroundColor:dispYrs.map(d=>d.yr===yrs?goldC:goldC+'55'),
+      borderColor:goldC,borderWidth:1,borderRadius:3,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...ttO,callbacks:{label:c=>' Annual: HK$'+c.parsed.y.toLocaleString()}}},
+      scales:{x:scX,y:scY}}
+  });
+
+  /* ── gain vs contrib bar at milestones ── */
+  if(gainC)gainC.destroy();
+  const ms=ALL.filter(d=>[3,5,10,15,20,25,30,35].includes(d.yr));
+  gainC=new Chart(document.getElementById('gainChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:ms.map(d=>'Yr '+d.yr),datasets:[
+      {label:'HA contributions',data:ms.map(d=>d.cumContrib),backgroundColor:'rgba(255,255,255,0.10)',borderColor:'rgba(255,255,255,0.18)',borderWidth:1,borderRadius:3},
+      {label:'Investment gain',data:ms.map(d=>d.gain),backgroundColor:goldC+'88',borderColor:goldC,borderWidth:1,borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:cv('--ctt'),font:{size:10,family:"'Geist Mono',monospace"}}},
+        tooltip:{...ttO,callbacks:{label:c=>' '+c.dataset.label+': HK$'+c.parsed.y.toLocaleString()}}},
+      scales:{x:{...scX,stacked:true},y:{...scY,stacked:true}}}
+  });
+
+  /* ── year-by-year table ── */
+  const vest0C=cv('--vest0'),vest30C=cv('--vest30'),vest100C=cv('--vest100');
+  document.getElementById('tBody').innerHTML=ALL.map(d=>{
+    const isCur=d.yr===yrs;
+    const rowCls=isCur?'row-cur '+(d.vest===0?'row-v0':d.vest===100?'row-v100':'row-v30'):'';
+    return `<tr class="${rowCls}">
+      <td class="${d.vest===0?'r':d.vest===100?'gr':'g'}">${isCur?'▶ ':''}${d.yr}</td>
+      <td>$${d.sal.toLocaleString()}</td>
+      <td class="g">$${d.annContrib.toLocaleString()}</td>
+      <td>$${d.cumContrib.toLocaleString()}</td>
+      <td class="g" style="font-weight:${isCur?600:400}">$${d.gross.toLocaleString()}</td>
+      <td class="${d.gain>0?'gr':'m'}">+$${d.gain.toLocaleString()}</td>
+      <td class="${d.gain>0?'gr':'m'}">+${pct(d.gainPct)}</td>
+      <td class="${d.vest===0?'r':d.vest===100?'gr':'g'}">${d.vest}%</td>
+      <td class="${d.vest===0?'r':d.vest===100?'gr':'g'}" style="font-weight:${isCur?600:400}">
+        ${d.vest===0?'—':'$'+d.claimable.toLocaleString()}
+      </td>
+      <td class="${d.forfeited>0?'r':'m'}">
+        ${d.forfeited>0?'$'+d.forfeited.toLocaleString():'—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  /* scroll current row into view */
+  setTimeout(()=>{
+    const rows=document.getElementById('tBody').querySelectorAll('tr');
+    if(rows[yrs-1]) rows[yrs-1].scrollIntoView({block:'nearest',behavior:'smooth'});
+  },80);
+}
+
+update();
+</script>
+</body>
+</html>
